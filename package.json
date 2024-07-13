@@ -1,0 +1,25 @@
+{
+  "name": "@workadventure/playwright-synthetic-monitoring",
+  "version": "1.0.0",
+  "description": "Monitor your website uptime using E2E Playwright tests.",
+  "main": "index.js",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "playwright test --project=chromium"
+  },
+  "author": "David Négrier",
+  "license": "proprietary",
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.14.10",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "@playwright/test": "^1.45.1",
+    "express": "^4.19.2",
+    "tsx": "^4.16.2",
+    "zod": "^3.23.8"
+  },
+  "type": "module"
+}
