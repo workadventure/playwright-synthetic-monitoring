@@ -19,8 +19,11 @@ It exposes:
 
 - a Prometheus `/metrics` endpoint that you can scrape to get the test results
 - a `/healthcheck` endpoint that will return an HTTP 200 if the tests are successful or an HTTP 500 status code if one of the tests are failing. The `/healthcheck` endpoint can be used with an uptime tracking tool like [UptimeRobot](https://uptimerobot.com).
+
+In addition, it provides:
+
 - a `/last-error` webpage that contains the results of the last failed Playwright report
-- a '/' webpage to show the status of the last test and provide links to the other pages
+- a `/` webpage to show the status of the last test and provide links to the other pages (see screenshot above)
 
 > [!NOTE]  
 > The `/last-error` page is available even after the tests run successfully again. This way, you can take your time
@@ -59,11 +62,7 @@ Assuming your tests are in the `./tests` directory, you can start the image with
 docker run --rm -p 3000:3000 -v $(pwd)/tests:/work/tests:ro workadventure/playwright-synthetic-monitoring:latest
 ```
 
-Check the `/healthcheck` endpoint:
-
-```bash
-curl http://localhost:3000/healthcheck
-```
+Open your browser at http://localhost:3000 to see the status of the last test.
 
 ### With Docker Compose
 
@@ -81,11 +80,7 @@ services:
       - 3000:3000
 ```
 
-Check the `/healthcheck` endpoint:
-
-```bash
-curl http://localhost:3000/healthcheck
-```
+Open your browser at http://localhost:3000 to see the status of the last test.
 
 ### Building your own image containing your tests
 
