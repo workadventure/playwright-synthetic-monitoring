@@ -1,10 +1,14 @@
 # Playwright Synthetic Monitoring
 
-# WORK IN PROGRESS
+[![Docker Image Version (latest semver)](https://img.shields.io/docker/v/workadventure/playwright-synthetic-monitoring?sort=semver)](https://hub.docker.com/r/workadventure/playwright-synthetic-monitoring)
+[![Docker Image Size (latest semver)](https://img.shields.io/docker/image-size/workadventure/playwright-synthetic-monitoring?sort=semver)](https://hub.docker.com/r/workadventure/playwright-synthetic-monitoring)
+[![Docker Pulls](https://img.shields.io/docker/pulls/workadventure/playwright-synthetic-monitoring)](https://hub.docker.com/r/workadventure/playwright-synthetic-monitoring)
 
 Playwright Synthetic Monitoring is a Docker image that allows you to monitor your website uptime using E2E Playwright tests.
 
 ## What does it do?
+
+![](screenshot.png)
 
 The image runs Playwright tests at regular interval (every 5 minutes by default).
 
