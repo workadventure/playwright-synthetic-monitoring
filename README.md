@@ -15,6 +15,13 @@ It exposes:
 
 - a Prometheus `/metrics` endpoint that you can scrape to get the test results
 - a `/healthcheck` endpoint that will return an HTTP 200 if the tests are successful or an HTTP 500 status code if one of the tests are failing. The `/healthcheck` endpoint can be used with an uptime tracking tool like [UptimeRobot](https://uptimerobot.com).
+- a `/last-error` webpage that contains the results of the last failed Playwright report
+- a '/' webpage to show the status of the last test and provide links to the other pages
+
+> [!NOTE]  
+> The `/last-error` page is available even after the tests run successfully again. This way, you can take your time
+> to investigate what went wrong after recovery.
+
 
 ## Usage
 
@@ -97,6 +104,14 @@ docker build -t my-playwright-tests .
 ### Helm deployment
 
 To be done
+
+## Testing / debugging your tests
+
+If you want to run your synthetic test only once and see the result, you can run the `npm run test` command inside the container.
+
+```bash
+docker run --rm -p 3000:3000 -v $(pwd)/tests:/work/tests:ro workadventure/playwright-synthetic-monitoring:latest npm run test
+```
 
 ## Prometheus endpoint
 
