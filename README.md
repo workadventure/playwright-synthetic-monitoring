@@ -102,7 +102,57 @@ docker build -t my-playwright-tests .
 
 ### Helm deployment
 
-To be done
+This package comes with a Helm chart.
+To use it, you will first need to create your own Docker image containing your tests (see above).
+
+Then, you can create a `values.yaml` file:
+
+```yaml
+image:
+  repository: my-repo.com/my-namespace/my-playwright-tests
+  tag: latest
+```
+
+If your image is private, you can provide a `imagePullSecrets`:
+
+```yaml
+imageCredentials:
+  # URL to the registry (i.e. my-registry.my-domain.com:444)
+  registry: ""
+  username: ""
+  password: ""
+  email: ""
+```
+
+You should then expose the service on an ingress.
+Assuming you are using Nginx as an Ingress Controller and CertManager + Let's encrypt to manage your certificates, 
+you can use the following configuration:
+
+```yaml
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: my-domain.com
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls:
+    - secretName: chart-example-tls
+      hosts:
+        - my-domain.com
+```
+
+Finally, you can deploy the Helm chart:
+
+```bash
+helm repo add workadventure https://charts.workadventu.re/
+helm install playwright-synthetic-monitoring workadventure/playwright-synthetic-monitoring
+```
+
 
 ## Testing / debugging your tests
 
