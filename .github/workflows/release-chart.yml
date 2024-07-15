@@ -1,0 +1,51 @@
+name: Release Chart
+
+on:
+  push:
+    branches:
+      - main
+  release:
+    types:
+      - created
+
+jobs:
+  release:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+
+      - name: Add repositories
+        run: helm dependency update
+        working-directory: helm
+
+      - name: Configure proper version number. Use "0.0.9-dev1" for main and "tag" for releases
+        run: |
+            if [ -z "$GITHUB_REF_NAME" ]; then
+                echo "GITHUB_REF_NAME is not set. Exiting."
+                exit 1
+            fi
+            if [ "$GITHUB_REF_NAME" != "main" ]; then
+                echo "Setting version to $GITHUB_REF_NAME"
+                sed -i "s/version: 0.0.9-dev1/version: $GITHUB_REF_NAME/g" Chart.yaml
+                sed -i "s/appVersion: \"0.0.9-dev1\"/appVersion: \"$GITHUB_REF_NAME\"/g" Chart.yaml
+            fi
+        working-directory: helm
+
+      - name: Install chart-museum push plugin
+        run: helm plugin install https://github.com/chartmuseum/helm-push
+
+      - name: Adding WorkAdventure repository
+        run: helm repo add workadventure-charts https://charts.workadventu.re
+
+      - name: Package and push Helm chart
+        run: helm cm-push . --force workadventure-charts
+        working-directory: helm
+        env:
+          HELM_REPO_USERNAME: workadventure
+          HELM_REPO_PASSWORD: ${{ secrets.HELM_REPO_PASSWORD }}

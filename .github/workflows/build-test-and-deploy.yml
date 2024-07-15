@@ -7,6 +7,8 @@ on:
   push:
     branches:
       - 'main'
+    tags:
+      - 'v*'
 #  schedule:
 #    - cron: '43 5 * * 0'
 
@@ -28,20 +30,22 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - uses: rlespinasse/github-slug-action@4.2.3
+      #- uses: rlespinasse/github-slug-action@4.2.3
+
+      -
+        name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: workadventure/playwright-synthetic-monitoring
 
       - name: Build and push
         uses: docker/build-push-action@v3
-#        if: ${{ github.event_name == 'push' || github.event_name == 'release' || github.event_name == 'pull_request' && (contains(github.event.pull_request.labels.*.name, 'deploy') || contains(github.event.pull_request.labels.*.name, 'build')) }}
         with:
           context: .
           file: ./Dockerfile
           platforms: linux/amd64,linux/arm64
           # Only push on tags or main branch
-          push: ${{ github.event_name == 'push' }}
-          tags: workadventure/playwright-synthetic-monitoring:${{ github.event_name == 'pull_request' && env.GITHUB_HEAD_REF_SLUG || env.GITHUB_REF_SLUG }}
-          cache-from: |
-            type=registry,ref=workadventure/playwright-synthetic-monitoring:${{ github.event_name == 'pull_request' && env.GITHUB_HEAD_REF_SLUG || env.GITHUB_REF_SLUG }}
-            type=registry,ref=workadventure/playwright-synthetic-monitoring:develop
-          cache-to: type=inline
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
