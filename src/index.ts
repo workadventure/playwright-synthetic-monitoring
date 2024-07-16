@@ -2,6 +2,7 @@ import express from "express";
 import {ChildProcess, exec} from "node:child_process";
 import copy from "recursive-copy";
 import {statSync} from "node:fs";
+import {env} from "./EnvironmentVariable";
 
 // Let's start an express server.
 // This server will respond on the /healthcheck and the /metrics route with the status of the last page loading of Pupetteer
@@ -118,7 +119,7 @@ let childProcess: ChildProcess|undefined = undefined;
 test().catch(e => console.error(e));
 setInterval(() => {
     test().catch(e => console.error(e));
-}, 60*1000);
+}, env.MONITORING_INTERVAL * 1000);
 
 async function test() {
     if (childProcess) {

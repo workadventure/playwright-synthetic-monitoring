@@ -150,7 +150,7 @@ Finally, you can deploy the Helm chart:
 
 ```bash
 helm repo add workadventure https://charts.workadventu.re/
-helm install playwright-synthetic-monitoring workadventure/playwright-synthetic-monitoring
+helm install playwright-synthetic-monitoring workadventure/playwright-synthetic-monitoring -f values.yaml
 ```
 
 
@@ -161,6 +161,15 @@ If you want to run your synthetic test only once and see the result, you can run
 ```bash
 docker run --rm -p 3000:3000 -v $(pwd)/tests:/work/tests:ro workadventure/playwright-synthetic-monitoring:latest npm run test
 ```
+
+## Configuring the test interval
+
+By default, the tests are run every 5 minutes.
+
+You can configure the interval by setting the `MONITORING_INTERVAL` environment variable to the number of seconds between each test.
+
+Note: the tests should of course be fast enough to complete in the interval you set. If the test does not complete in 
+the `MONITORING_INTERVAL`, it will be killed and considered as failed.
 
 ## Prometheus endpoint
 
