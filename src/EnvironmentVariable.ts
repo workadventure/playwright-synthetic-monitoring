@@ -16,8 +16,16 @@ export function toBool(value: BoolAsString | undefined, defaultValue: boolean): 
     return value === "true" || value === "1";
 }
 
+export function toNumber(value: string | undefined, defaultValue: number): number {
+    if (value === undefined || value === "") {
+        return defaultValue;
+    }
+    return Number(value);
+}
+
+
 const EnvironmentVariables = z.object({
-    HEADLESS: BoolAsString.optional().transform((val) => toBool(val, false)),
+    MONITORING_INTERVAL: z.string().optional().transform((val) => toNumber(val, 300)),
 });
 
 export const env = EnvironmentVariables.parse(process.env);
