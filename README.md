@@ -171,6 +171,10 @@ You can configure the interval by setting the `MONITORING_INTERVAL` environment 
 Note: the tests should of course be fast enough to complete in the interval you set. If the test does not complete in 
 the `MONITORING_INTERVAL`, it will be killed and considered as failed.
 
+## Configuring the base URL
+
+You can configure the base URL of the tests with the `BASE_URL` environment variable.
+
 ## Prometheus endpoint
 
 The Prometheus `/metrics` endpoint returns 2 metrics:
