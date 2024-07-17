@@ -26,13 +26,27 @@ export default defineConfig({
   reporter: [ ['html', { open: 'never' }] ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
+    /* Maximum time each action such as `click()` can take. Defaults to 0 (no limit). */
+    actionTimeout: 20_000,
+    navigationTimeout: 60_000,
+    // Emulates the user locale. See https://playwright.dev/docs/api/class-browsertype#browsertypelaunchoptions
+    locale: 'en-US',
     /* Base URL to use in actions like `await page.goto('/')`. */
     // baseURL: 'http://127.0.0.1:3000',
+    baseURL: process.env.BASE_URL || undefined,
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
   },
-
+  /* Maximum time one test can run for. */
+  timeout: 60 * 1000,
+  expect: {
+    /**
+     * Maximum time expect() should wait for the condition to be met.
+     * For example in `await expect(locator).toHaveText();`
+     */
+    timeout: 10_000
+  },
   /* Configure projects for major browsers */
   projects: [
     {
