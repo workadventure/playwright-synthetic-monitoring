@@ -38,6 +38,9 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: workadventure/playwright-synthetic-monitoring
+          tags: |
+            # set latest tag for master branch
+            type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push
         uses: docker/build-push-action@v3
