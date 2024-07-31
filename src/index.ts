@@ -1,5 +1,5 @@
 import express from "express";
-import {ChildProcess, exec} from "node:child_process";
+import {ChildProcess, spawn} from "node:child_process";
 import copy from "recursive-copy";
 import {statSync} from "node:fs";
 import {env} from "./EnvironmentVariable";
@@ -116,10 +116,12 @@ app.listen(3000, () => {
 
 let childProcess: ChildProcess|undefined = undefined;
 
+
+console.log(`Will run the test every ${env.MONITORING_INTERVAL} seconds`);
 test().catch(e => console.error(e));
 setInterval(() => {
     test().catch(e => console.error(e));
-}, env.MONITORING_INTERVAL * 1000);
+}, env.MONITORING_INTERVAL *1000);
 
 async function test() {
     if (childProcess) {
@@ -128,25 +130,25 @@ async function test() {
         childProcess = undefined;
     }
     const startTime = Date.now();
-    childProcess = exec("npm run test", (error, stdout, stderr) => {
+    const now = new Date()
+    const nextStartTime = new Date(now.getTime() + env.MONITORING_INTERVAL * 1000);
+    childProcess = spawn("npm", ["run", "test"], {stdio: "inherit"})
+    
+    childProcess.on('close', (code) => {
         testDuration = Date.now() - startTime;
-        if (stdout) {
-            console.log(stdout);
-        }
-        if (stderr) {
-            console.log(stderr);
-        }
-        if (error) {
-            console.error("Error code received: " + error.code);
+        if (code !== 0) {
+            console.error(`Test exited with code ${code}`);
             status = 'ko';
             // Let's copy the content of the playwright-report in the "last-error" directory.
             copy('playwright-report', 'last-error', {overwrite: true, dot: true}).then((result) => {
-                // TODO: listen to events
                 console.log("Report copied to 'last-error' directory");
             });
-        } else {
+        }
+        else {
             status = 'ok';
+            // the next run time is startTime + env.MONITORING_INTERVAL * 1000
+            console.log(`Test succeeded! Next run will be at ${nextStartTime.toLocaleString()}` );
         }
         childProcess = undefined;
-    });
+    })
 }
