@@ -29,14 +29,16 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.DOCKERHUB_USERNAME }}/playwright-synthetic-monitoring
+          images: |
+            ${{ env.DOCKERHUB_USERNAME }}/playwright-synthetic-monitoring
+            ghcr.io/${{ github.actor }}/playwright-synthetic-monitoring
           tags: |
             # set latest tag for master branch
             type=raw,value=latest,enable={{is_default_branch}}
           
       - name: Login to DockerHub
         # Merge ~ push.
-        #if: ${{ github.event_name == 'push' || github.event_name == 'schedule' }}
+        # if: ${{ github.event_name == 'push' || github.event_name == 'schedule' }}
         if: ${{ github.event_name == 'push' }}
         uses: docker/login-action@v1
         with:
@@ -50,8 +52,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: rlespinasse/github-slug-action@4.2.3
-
+      # - uses: rlespinasse/github-slug-action@4.2.3
 
       - name: Build and push
         uses: docker/build-push-action@v3
@@ -69,3 +70,4 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: ${{ env.DOCKERHUB_USERNAME }}/playwright-synthetic-monitoring

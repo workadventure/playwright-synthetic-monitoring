@@ -5,9 +5,5 @@ services:
       - "9323:9323"
     volumes:
       - /etc/timezone:/etc/timezone:ro
-      - ../swf-status/packages/synthetic-monitoring/tests:/work/tests
-      # - ../swf-status/packages/synthetic-monitoring/playwright.config.ts:/work/playwright.config.ts
-    environment:
-      - TZ=Asia/Shanghai
-
-
+    # environment:
+    #   - TZ=Asia/Shanghai
