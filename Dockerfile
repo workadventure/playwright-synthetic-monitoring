@@ -7,7 +7,8 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 EXPOSE 3000
 WORKDIR /work
 
-COPY . .
+COPY package.json package-lock.json ./
 RUN npm ci
+COPY . .
 
 CMD ["npm", "run", "start"]

@@ -2,16 +2,19 @@
 // README at: https://github.com/devcontainers/templates/tree/main/src/docker-outside-of-docker-compose
 {
 	"name": "Docker from Docker Compose",
-	"dockerComposeFile": "../compose.yml",
-	"service": "playwright-synthetic-monitoring",
-	"workspaceFolder": "/work/",
-	// "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
-	// Use this environment variable if you need to bind mount your local source code into a new container.
-	"remoteEnv": {
-		"LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}"
-	}
-	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [],
+	"dockerComposeFile": [
+		"../compose.yml",
+		"compose.override.yml"
+	],
+		"service": "playwright-synthetic-monitoring",
+		// "workspaceFolder": "/work/",
+		"workspaceFolder": "/workspaces/",
+		// Use this environment variable if you need to bind mount your local source code into a new container.
+		"remoteEnv": {
+			"LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}"
+		}
+		// Use 'forwardPorts' to make a list of ports inside the container available locally.
+		// "forwardPorts": [],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
 	// "postCreateCommand": "docker --version",

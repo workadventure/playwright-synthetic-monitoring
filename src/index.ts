@@ -47,9 +47,17 @@ app.get('/', (req, res) => {
     let lastErrorDate = "Never";
     let hasLastError = false;
     try {
-        const stats = statSync('last-error/index.html');
-        lastErrorDate = stats.mtime.toLocaleString();
+        lastErrorDate = statSync('last-error/index.html').mtime.toLocaleString();
         hasLastError = true;
+    } catch (e) {
+        // Do nothing
+    }
+
+    let lastSuccessDate = "Never"
+    let hasLastSuccess = false;
+    try {
+        lastSuccessDate = statSync('last-success/index.html').mtime.toLocaleString();
+        hasLastSuccess = true
     } catch (e) {
         // Do nothing
     }
@@ -94,6 +102,7 @@ app.get('/', (req, res) => {
     <p>Current status: <span class="status-badge ${status}">${statusText}</span></p>
     <p>Last test duration: ${testDuration / 1000} seconds</p>
     <p>Last error date: ${lastErrorDate} ${hasLastError ? `<a href="/last-error">(view last error report)</a>` : ""}</p>
+    <p>Last success date: ${lastSuccessDate} ${hasLastSuccess? `<a href="/last-success">(view last success report)</a>` : ""}</p>
     <ul>
         <li>
             <a href="/healthcheck">Healthcheck</a>: use this link to track the status of the test in a monitoring tool like UptimeRobot.
@@ -109,6 +118,7 @@ app.get('/', (req, res) => {
 });
 
 app.use("/last-error", express.static('last-error'));
+app.use("/last-success", express.static('last-success'));
 
 app.listen(3000, () => {
     console.log('Server listening on port 3000');
@@ -146,8 +156,10 @@ async function test() {
         }
         else {
             status = 'ok';
-            // the next run time is startTime + env.MONITORING_INTERVAL * 1000
             console.log(`Test succeeded! Next run will be at ${nextStartTime.toLocaleString()}` );
+            copy('playwright-report', 'last-success', {overwrite: true, dot: true}).then((result) => {
+                console.log("Report copied to 'last-success' directory");
+            });
         }
         childProcess = undefined;
     })
