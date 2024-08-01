@@ -1,0 +1,9 @@
+services: 
+  playwright-synthetic-monitoring:
+    build: .
+    ports:
+      - "3008:3000"
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+    # environment:
+    #   - TZ=Asia/Shanghai

@@ -1,5 +1,5 @@
 import express from "express";
-import {ChildProcess, exec} from "node:child_process";
+import {ChildProcess, spawn} from "node:child_process";
 import copy from "recursive-copy";
 import {statSync} from "node:fs";
 import {env} from "./EnvironmentVariable";
@@ -47,9 +47,17 @@ app.get('/', (req, res) => {
     let lastErrorDate = "Never";
     let hasLastError = false;
     try {
-        const stats = statSync('last-error/index.html');
-        lastErrorDate = stats.mtime.toLocaleString();
+        lastErrorDate = statSync('last-error/index.html').mtime.toLocaleString();
         hasLastError = true;
+    } catch (e) {
+        // Do nothing
+    }
+
+    let lastSuccessDate = "Never"
+    let hasLastSuccess = false;
+    try {
+        lastSuccessDate = statSync('last-success/index.html').mtime.toLocaleString();
+        hasLastSuccess = true
     } catch (e) {
         // Do nothing
     }
@@ -94,6 +102,7 @@ app.get('/', (req, res) => {
     <p>Current status: <span class="status-badge ${status}">${statusText}</span></p>
     <p>Last test duration: ${testDuration / 1000} seconds</p>
     <p>Last error date: ${lastErrorDate} ${hasLastError ? `<a href="/last-error">(view last error report)</a>` : ""}</p>
+    <p>Last success date: ${lastSuccessDate} ${hasLastSuccess? `<a href="/last-success">(view last success report)</a>` : ""}</p>
     <ul>
         <li>
             <a href="/healthcheck">Healthcheck</a>: use this link to track the status of the test in a monitoring tool like UptimeRobot.
@@ -109,6 +118,7 @@ app.get('/', (req, res) => {
 });
 
 app.use("/last-error", express.static('last-error'));
+app.use("/last-success", express.static('last-success'));
 
 app.listen(3000, () => {
     console.log('Server listening on port 3000');
@@ -116,10 +126,12 @@ app.listen(3000, () => {
 
 let childProcess: ChildProcess|undefined = undefined;
 
+
+console.log(`Will run the test every ${env.MONITORING_INTERVAL} seconds`);
 test().catch(e => console.error(e));
 setInterval(() => {
     test().catch(e => console.error(e));
-}, env.MONITORING_INTERVAL * 1000);
+}, env.MONITORING_INTERVAL *1000);
 
 async function test() {
     if (childProcess) {
@@ -128,25 +140,28 @@ async function test() {
         childProcess = undefined;
     }
     const startTime = Date.now();
-    childProcess = exec("npm run test", (error, stdout, stderr) => {
+    const now = new Date()
+    const nextStartTime = new Date(now.getTime() + env.MONITORING_INTERVAL * 1000);
+    childProcess = spawn("npm", ["run", "test"], {stdio: "inherit"})
+    
+    childProcess.on('close', (code) => {
         testDuration = Date.now() - startTime;
-        if (stdout) {
-            console.log(stdout);
-        }
-        if (stderr) {
-            console.log(stderr);
-        }
-        if (error) {
-            console.error("Error code received: " + error.code);
+        if (code !== 0) {
+            console.error(`Test exited with code ${code}`);
             status = 'ko';
             // Let's copy the content of the playwright-report in the "last-error" directory.
             copy('playwright-report', 'last-error', {overwrite: true, dot: true}).then((result) => {
-                // TODO: listen to events
                 console.log("Report copied to 'last-error' directory");
             });
-        } else {
-            status = 'ok';
         }
+        else {
+            status = 'ok';
+            console.log(`Test succeeded!`)
+            copy('playwright-report', 'last-success', {overwrite: true, dot: true}).then((result) => {
+                console.log("Report copied to 'last-success' directory");
+            });
+        }
+        console.log(`Next run will be at ${nextStartTime.toLocaleString()}` );
         childProcess = undefined;
-    });
+    })
 }
