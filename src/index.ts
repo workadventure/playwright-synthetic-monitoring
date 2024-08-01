@@ -156,11 +156,12 @@ async function test() {
         }
         else {
             status = 'ok';
-            console.log(`Test succeeded! Next run will be at ${nextStartTime.toLocaleString()}` );
+            console.log(`Test succeeded!`)
             copy('playwright-report', 'last-success', {overwrite: true, dot: true}).then((result) => {
                 console.log("Report copied to 'last-success' directory");
             });
         }
+        console.log(`Next run will be at ${nextStartTime.toLocaleString()}` );
         childProcess = undefined;
     })
 }
