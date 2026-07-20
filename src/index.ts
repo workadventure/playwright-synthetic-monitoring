@@ -1,6 +1,6 @@
 import express from "express";
 import * as fs from "fs";
-import { ChildProcess, exec } from "node:child_process";
+import { ChildProcess, spawn } from "node:child_process";
 import { statSync } from "node:fs";
 import copy from "recursive-copy";
 import { env } from "./EnvironmentVariable";
@@ -125,20 +125,27 @@ setInterval(() => {
 async function test() {
     if (childProcess) {
         console.log("Killing process that did not finish in time");
-        childProcess.kill();
+        // `detached` puts the test in its own process group, so a negative PID kills the
+        // whole tree (sh -> npm -> playwright -> chrome). Killing just the child would
+        // orphan the browsers, and orphaned Chrome processes never go away.
+        if (childProcess.pid !== undefined) {
+            try {
+                process.kill(-childProcess.pid, 'SIGKILL');
+            } catch (e) {
+                // The group is already gone.
+            }
+        }
         childProcess = undefined;
     }
     const startTime = Date.now();
-    childProcess = exec("npm run test", (error, stdout, stderr) => {
+    const child = spawn("npm", ["run", "test"], {detached: true});
+    childProcess = child;
+    child.stdout.on('data', (data) => console.log(data.toString()));
+    child.stderr.on('data', (data) => console.log(data.toString()));
+    child.on('close', (code) => {
         testDuration = Date.now() - startTime;
-        if (stdout) {
-            console.log(stdout);
-        }
-        if (stderr) {
-            console.log(stderr);
-        }
-        if (error) {
-            console.error("Error code received: " + error.code);
+        if (code !== 0) {
+            console.error("Error code received: " + code);
             status = 'ko';
             // Let's copy the content of the playwright-report in the "last-error" directory.
             copy('playwright-report', 'last-error', { overwrite: true, dot: true }).then((result) => {
@@ -183,6 +190,8 @@ async function test() {
         } else {
             status = 'ok';
         }
-        childProcess = undefined;
+        if (childProcess === child) {
+            childProcess = undefined;
+        }
     });
 }
